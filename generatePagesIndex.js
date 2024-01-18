@@ -1,6 +1,25 @@
 const fs = require('fs');
 const path = require('path');
 
+// Function to replace or append export statements to a target file
+function replaceOrAppendExportsToTarget(exportStatements, targetFilePath) {
+  const existingContent = fs.readFileSync(targetFilePath, 'utf-8');
+
+
+  const uniqueExportStatements = new Set(exportStatements);
+
+  // Remove existing export statements from the target content
+  const cleanedContent = [...existingContent.split('\n')]
+    .filter(line => !uniqueExportStatements.has(line.trim()))
+    .join('\n');
+
+  // Remove existing export statements from the target content
+  const newContent = cleanedContent + '\n' + exportStatements.join('\n')
+  
+  // Append or replace export statements
+  fs.writeFileSync(targetFilePath, newContent);
+}
+
 // Function to recursively get all files in a directory
 function getAllFiles(dirPath, fileList = []) {
   const files = fs.readdirSync(dirPath);
@@ -47,11 +66,11 @@ if (potentialUnknownFolders.length === 0) {
       return `export * from '../plugins/${unknownFolder}/pages/${componentName}';`;
     });
 
-    const indexContent = exportStatements.join('\n');
+    // const indexContent = exportStatements.join('\n');
 
     const pagesDir = path.join(__dirname, 'src', 'pages');
 
-    fs.appendFileSync(path.join(pagesDir, 'index.ts'), indexContent);
+    replaceOrAppendExportsToTarget(exportStatements, path.join(pagesDir, 'index.ts'));
   });
 }
 
