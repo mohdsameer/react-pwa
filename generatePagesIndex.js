@@ -20,6 +20,33 @@ function replaceOrAppendExportsToTarget(exportStatements, targetFilePath) {
   fs.writeFileSync(targetFilePath, newContent);
 }
 
+function replaceOrAppendExportsToTargeturl(exportStatements, targetFilePath) {
+  const existingContent = fs.readFileSync(targetFilePath, 'utf-8');
+
+
+  const uniqueExportStatements = new Set(exportStatements);
+
+  // Remove existing export statements from the target content
+  const cleanedContent = [...existingContent.split('\n')]
+    .filter(line => !uniqueExportStatements.has(line.trim()))
+    .join('\n');
+  
+  // Remove existing export statements from the target content
+  const newContent = cleanedContent + '\n' + exportStatements.join('\n')
+  console.log("newContent",newContent)
+
+  if(existingContent){
+    fs.truncateSync(targetFilePath, 0)   
+  }
+
+  const relativeurl =` export const relativeurl = [
+    ${newContent}
+  ]`
+  
+  // Append or replace export statements
+  fs.writeFileSync(targetFilePath, relativeurl);
+}
+
 // Function to recursively get all files in a directory
 function getAllFiles(dirPath, fileList = []) {
   const files = fs.readdirSync(dirPath);
@@ -71,6 +98,22 @@ if (potentialUnknownFolders.length === 0) {
     const pagesDir = path.join(__dirname, 'src', 'pages');
 
     replaceOrAppendExportsToTarget(exportStatements, path.join(pagesDir, 'index.ts'));
+  });
+
+  potentialUnknownFolders.forEach(unknownFolder => {
+    const pagesDirectory = path.join(pluginsDirectory, unknownFolder, 'pages');
+    const allFilesInPages = getAllFiles(pagesDirectory);
+
+    const exportStatements = allFilesInPages.map((file) => {
+      const componentName = path.basename(file, '^(.+)\/([^\/]+)$');
+      return `'/${unknownFolder}/${componentName.split('.')[0]}',`
+    });
+
+    // const indexContent = exportStatements.join('\n');
+
+    const pagesDir = path.join(__dirname, 'src');
+
+    replaceOrAppendExportsToTargeturl(exportStatements, path.join(pagesDir, 'pluginurl.tsx'));
   });
 }
 

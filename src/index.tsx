@@ -3,11 +3,13 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import * as Pages from "./pages";
+import { relativeurl } from './pluginurl'
 
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-console.log('Pages', Pages)
+import { store } from './redux/store'
+import { Provider } from 'react-redux'
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -15,21 +17,24 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <React.StrictMode>
-    <BrowserRouter>
-      <Suspense fallback={<div>Loading...</div>}>
-        <Routes>
-          <Route path="/" element={<App />}>
-            {Object.entries(Pages).map(([componentName, Component]) => (
-              <Route
-                key={componentName}
-                path={`/${componentName.toLowerCase()}`}
-                element={<Component />}
-              />
-            ))}
-          </Route>
-        </Routes>
-      </Suspense>
-    </BrowserRouter>
+    <Provider store={store}>
+      <BrowserRouter>
+        <Suspense fallback={<div>Loading...</div>}>
+          <Routes>
+            <Route path="/" element={<App />}>
+              {Object.entries(Pages).map(([componentName, Component]) => {
+                let data = relativeurl.filter(item => item.includes(componentName.toLowerCase()))
+                return <Route
+                  key={componentName}
+                  path={data?.length > 0 ? data[0] : `/${componentName.toLowerCase()}`}
+                  element={<Component />}
+                />
+              })}
+            </Route>
+          </Routes>
+        </Suspense>
+      </BrowserRouter>
+    </Provider>
   </React.StrictMode>
 );
 
