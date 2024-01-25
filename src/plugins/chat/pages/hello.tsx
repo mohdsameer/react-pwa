@@ -1,13 +1,17 @@
-import { useAppSelector } from '../../../redux/hook'
-import { ApplicationData } from '../../../redux/reducer/applicationSlice'
+import { useSelector } from 'react-redux'
 
 export function Hello() {
   
-  const value = useAppSelector((state) => state.appData.value)
+  const value = (useSelector as any)((state: any) => state.appData.value)
+
+  const list = (window as any).getList()
 
   return (
     <main style={{ padding: "1rem 0" }}>
-      <h2>Hello World { value }</h2>
+      <h2>Hello { (window as any).myCustomProperty }</h2>
+      {value}
+      <br/>
+      { list.name }
     </main>
   );
 }

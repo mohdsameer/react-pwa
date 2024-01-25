@@ -30,21 +30,19 @@ function replaceOrAppendExportsToTargeturl(exportStatements, targetFilePath) {
   const cleanedContent = [...existingContent.split('\n')]
     .filter(line => !uniqueExportStatements.has(line.trim()))
     .join('\n');
+
+    console.log("cleanedContent",cleanedContent)
   
   // Remove existing export statements from the target content
   const newContent = cleanedContent + '\n' + exportStatements.join('\n')
   console.log("newContent",newContent)
 
-  if(existingContent){
-    fs.truncateSync(targetFilePath, 0)   
-  }
-
-  const relativeurl =` export const relativeurl = [
+  const relativeurl =`export const relativeurl = [
     ${newContent}
   ]`
   
   // Append or replace export statements
-  fs.writeFileSync(targetFilePath, relativeurl);
+  fs.writeFileSync(targetFilePath, relativeurl, {encoding:'utf8',flag:'w'});
 }
 
 // Function to recursively get all files in a directory
